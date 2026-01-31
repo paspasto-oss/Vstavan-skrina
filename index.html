@@ -1,0 +1,141 @@
+// ---------- Hlavný výpočet dielov (Cut List)
+  function generateCutList() {
+    const W = getVal("W"), H = getVal("H"), D = getVal("D"), t = getVal("t");
+    const setback = getVal("setback"), dCount = Math.max(2, getVal("doors")), overlap = getVal("overlap");
+    const gapH = getVal("gapHeightTotal"), gapS = getVal("gapSideTotal");
+    const parts = [];
+
+    // 1. Dorazové lišty (L-ka na stenu, ktoré vyrovnajú nerovnosti)
+    addPart(parts, "Dorazová lišta zvislá", "DTD", H, 100, 2, "Na steny (vľavo/vpravo)");
+    addPart(parts, "Dorazová lišta vodorovná", "DTD", W - 200, 100, 2, "Na strop a podlahu");
+
+    // 2. Vnútorný korpus (svetlosť po odpočítaní dorazových líšt a vôle)
+    const innerW = W - gapS;
+    const innerH = H - gapH;
+    
+    addPart(parts, "Bok skrine", "DTD", innerH, D, 2, "Hlavné stojky");
+    addPart(parts, "Pôda / Dno", "DTD", innerW - (2 * t), D, 2);
+    addPart(parts, "Chrbát (HDF)", "HDF", innerH - 5, innerW - 5, 1, "Smer dekoru zvisle");
+
+    // 3. Sekcie a vnútorné delenie
+    state.sections.forEach((sec, idx) => {
+      // Priečky
+      if (idx < state.sections.length - 1) {
+        addPart(parts, `Vnútorná priečka`, "DTD", innerH - (2 * t), D - setback, 1, `Medzi sekciou ${idx+1}/${idx+2}`);
+      }
+
+      // Moduly (Police, Zásuvky, Tyče)
+      sec.modules.forEach(m => {
+        if (m.type === "shelf") {
+          addPart(parts, "Polica", "DTD", sec.width, D - setback, 1, `Sekcia ${idx+1}`);
+        }
+        if (m.type === "drawers") {
+          const count = m.count || 1;
+          const gap = m.gap || 2;
+          const frontH = (m.height - (count - 1) * gap) / count;
+          addPart(parts, "Čelo zásuvky", "DTD", sec.width - 4, frontH, count, `Sekcia ${idx+1}`);
+          
+          if (el("drawerBoxes").value === "yes") {
+            const sGap = getVal("drawerSideGap");
+            const dW = sec.width - (2 * sGap);
+            const dD = D - setback - getVal("drawerDepthClear");
+            addPart(parts, "Zásuvka - bok", "DTD", dD, frontH - 50, count * 2);
+            addPart(parts, "Zásuvka - pred/zad", "DTD", dW - (2 * t), frontH - 50, count * 2);
+            addPart(parts, "Zásuvka - dno", "HDF", dW - 5, dD - 5, count);
+          }
+        }
+        if (m.type === "rod") {
+          addPart(parts, "Šatníková tyč", "Kov", sec.width - 5, 0, 1, `Sekcia ${idx+1}`);
+        }
+      });
+    });
+
+    // 4. POSUVNÉ DVERE - Hliníkový systém (výpočet krídel a výplní)
+    const wingW = (innerW - (2 * t) + (dCount - 1) * overlap) / dCount;
+    const wingH = innerH - (2 * t) - 40; // 40mm je štandardná vôľa na kolajnice
+
+    // Odpočty pre hliníkové profily (univerzálne pre systémy ako Sevroll/Laguna)
+    const handleW = 26; // šírka madla
+    const railH = 18;   // výška spodného/horného profilu krídla
+    
+    const fillW = wingW - (2 * handleW) + 12; // +12mm presah do drážok madiel
+    const fillH = wingH - (2 * railH);
+
+    addPart(parts, "Dverná výplň (DTD 10mm)", "DTD", fillH, fillW, dCount, `Pre krídlo ${round1(wingH)}x${round1(wingW)}`);
+    
+    // Hliníkové profily do objednávky
+    addPart(parts, "Hliníkové madlo (zvislé)", "AL", wingH, 0, dCount * 2);
+    addPart(parts, "Vodorovný profil (horný/dolný)", "AL", wingW - 52, 0, dCount * 2);
+    addPart(parts, "Vodiaca koľajnica horná", "AL", innerW - (2 * t), 0, 1);
+    addPart(parts, "Vodiaca koľajnica dolná", "AL", innerW - (2 * t), 0, 1);
+
+    // 5. Kovanie
+    addPart(parts, "Sada vozíkov (horné+dolné)", "Sada", 0, 0, dCount);
+    addPart(parts, "Dorazová štetina", "bm", Math.ceil((wingH * 2 * dCount) / 1000), 0, 1);
+
+    renderTable(parts);
+    return parts;
+  }
+
+  // ---------- Vizualizácia (SVG)
+  function renderPreview() {
+    const W = getVal("W"), H = getVal("H"), t = getVal("t");
+    const container = el("preview");
+    if(!container) return;
+    const pad = 30;
+    const ratio = Math.min((container.clientWidth - 2*pad)/W, (container.clientHeight - 2*pad)/H);
+    
+    let svg = `<svg width="100%" height="100%" viewBox="-${pad} -${pad} ${W+2*pad} ${H+2*pad}">`;
+    
+    // Nika (múr)
+    svg += `<rect x="-10" y="-10" width="${W+20}" height="${H+20}" fill="#eee" />`;
+    // Svetlosť skrine
+    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#fff" stroke="#333" stroke-width="2"/>`;
+    
+    // Sekcie
+    let curX = t;
+    state.sections.forEach((sec, sIdx) => {
+      let curY = t;
+      sec.modules.forEach(m => {
+        const mH = m.height;
+        let color = "#fff";
+        if (m.type === "shelf") color = "#ddd";
+        if (m.type === "drawers") color = "#fde68a";
+        if (m.type === "rod") color = "#93c5fd";
+
+        if (mH > 0) {
+          svg += `<rect x="${curX}" y="${curY}" width="${sec.width}" height="${mH}" fill="${color}" stroke="#999" />`;
+          if (mH > 30) svg += `<text x="${curX + 5}" y="${curY + 20}" font-size="20" fill="#666">${modLabel(m)}</text>`;
+        }
+        curY += mH;
+      });
+      curX += sec.width + t;
+    });
+
+    // Zóna dverí (vizuálna pomôcka)
+    svg += `<rect x="${t}" y="${H-t-40}" width="${W-(2*t)}" height="40" fill="rgba(255,0,0,0.1)" stroke="red" stroke-dasharray="4" />`;
+    svg += `<text x="${W/2}" y="${H-t-15}" font-size="25" text-anchor="middle" fill="red">Koľajnice dverí</text>`;
+    
+    svg += `</svg>`;
+    container.innerHTML = svg;
+  }
+
+  // Eventy pre tlačidlá
+  el("btnApplySections").onclick = () => { computeSectionsFromInputs(); renderEditor(); renderPreview(); };
+  el("btnGen").onclick = () => generateCutList();
+  el("btnCSV").onclick = () => download(toCSV(generateCutList()), "narezovy_plan.csv");
+  el("btnPrint").onclick = () => window.print();
+
+  function renderTable(parts) {
+    const tbody = el("tbody");
+    tbody.innerHTML = "";
+    parts.forEach(p => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${p.name}</td><td>${p.material}</td><td class="mono">${p.a} x ${p.b}</td><td>${p.qty}</td><td class="tiny">${p.note}</td>`;
+      tbody.appendChild(tr);
+    });
+    el("statusTag").textContent = `Dielov: ${parts.length}`;
+  }
+
+  // Spustenie pri štarte
+  window.onload = () => { computeSectionsFromInputs(); renderEditor(); renderPreview(); };
