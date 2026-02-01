@@ -3,82 +3,79 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rolldoor Pro – Expert Konfigurátor</title>
+  <title>Rolldoor Pro 2026 – Expert Mode</title>
   <style>
     :root { --red:#c40000; --bg:#f6f7fb; --card:#fff; --border:#e5e7eb; --text:#111827; --muted:#6b7280; }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-    header{max-width:1300px;margin:0 auto;padding:15px;border-bottom:1px solid var(--border);background:#fff}
-    h1{margin:0;font-size:20px;color:var(--red)}
-    .wrap{max-width:1300px;margin:0 auto;padding:20px;display:grid;grid-template-columns:450px 1fr;gap:20px}
+    body{margin:0;font-family:system-ui,-apple-system,Arial;background:var(--bg);color:var(--text)}
+    header{max-width:1300px;margin:0 auto;padding:15px;background:#fff;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .wrap{max-width:1300px;margin:0 auto;padding:20px;display:grid;grid-template-columns:420px 1fr;gap:20px}
     @media (max-width:1100px){.wrap{grid-template-columns:1fr}}
     .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:0 2px 4px rgba(0,0,0,0.05)}
-    .section-title{font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:15px;display:block;border-bottom:1px solid var(--border);padding-bottom:5px}
     .grid-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:15px}
-    label{display:block;font-size:11px;font-weight:700;margin-bottom:4px}
+    label{display:block;font-size:11px;font-weight:700;margin-bottom:4px;text-transform:uppercase;color:var(--muted)}
     input, select{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px}
     .btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
-    button{padding:10px 15px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:700;transition:0.2s}
+    button{padding:10px 15px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:700}
     button.primary{background:var(--red);color:#fff;border-color:var(--red)}
-    button.active{background:#eee;border-color:var(--muted)}
-    .modCard{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;border-left:5px solid var(--red)}
-    .preview-box{width:100%;height:400px;background:#eee;border-radius:12px;margin-bottom:20px;display:flex;justify-content:center;align-items:center;overflow:hidden;border:2px solid var(--border)}
+    button.danger{color:var(--red);border-color:var(--red)}
+    .modCard{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;border-left:5px solid var(--red);display:flex;justify-content:space-between;align-items:center}
+    .preview-box{width:100%;height:450px;background:#fff;border-radius:12px;margin-bottom:20px;border:1px solid var(--border);padding:10px}
     table{width:100%;border-collapse:collapse;font-size:13px}
-    th, td{padding:12px;text-align:left;border-bottom:1px solid var(--border)}
-    th{background:#f4f4f4;font-size:11px;text-transform:uppercase}
+    th, td{padding:10px;text-align:left;border-bottom:1px solid var(--border)}
+    th{background:#f4f4f4;font-size:11px}
     .mono{font-family:monospace;font-weight:700;color:var(--red)}
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Rolldoor Professional Konfigurátor 2026</h1>
+  <h1 style="margin:0;font-size:18px">Rolldoor Professional Konfigurátor</h1>
+  <button class="danger" onclick="clearData()">Vycistiť údaje</button>
 </header>
 
 <div class="wrap">
   <aside class="card">
-    <span class="section-title">1. Základné rozmery Niky</span>
+    <label class="section-title">Rozmery a Konštrukcia</label>
     <div class="grid-inputs">
-      <div><label>Šírka (W)</label><input id="W" type="number" value="3200" oninput="renderAll()"></div>
-      <div><label>Výška (H)</label><input id="H" type="number" value="2300" oninput="renderAll()"></div>
-      <div><label>Hĺbka (D)</label><input id="D" type="number" value="600" oninput="renderAll()"></div>
+      <div><label>Šírka</label><input id="W" type="number" value="3200" oninput="renderAll()"></div>
+      <div><label>Výška</label><input id="H" type="number" value="2300" oninput="renderAll()"></div>
+      <div><label>Hĺbka</label><input id="D" type="number" value="600" oninput="renderAll()"></div>
     </div>
 
-    <span class="section-title">2. Konštrukcia a Systém</span>
     <div class="grid-inputs">
       <div style="grid-column: span 2">
-        <label>Typ spodnej časti</label>
+        <label>Typ podstavy</label>
         <select id="baseType" onchange="renderAll()">
           <option value="no-bottom">Bez dna (koľajnica na zemi)</option>
-          <option value="with-bottom">S dnom (DTD doska pod koľajnicou)</option>
+          <option value="with-bottom">S dnom (DTD doska)</option>
         </select>
       </div>
-      <div>
-        <label>Hrúbka DTD</label>
-        <input id="t" type="number" value="18" oninput="renderAll()">
-      </div>
+      <div><label>DTD hr.</label><input id="t" type="number" value="18" oninput="renderAll()"></div>
     </div>
 
+    <label class="section-title">Dekory (Vzhľad)</label>
     <div class="grid-inputs">
-      <div style="grid-column: span 2">
-        <label>Hliníkový systém dverí</label>
-        <select id="handleType" onchange="renderAll()">
-          <option value="26">Madlo štandard (26mm)</option>
-          <option value="35">Madlo široké (35mm)</option>
+      <div style="grid-column: span 3">
+        <label>Dekor korpusu a políc</label>
+        <select id="decorBody" onchange="renderAll()">
+          <option value="#e3d5b8">Akácia Lakeland (H1277)</option>
+          <option value="#ffffff">Biela Perla (W908)</option>
+          <option value="#4a3728">Dub Hamilton (H3303)</option>
+          <option value="#d1d1d1">Sivá Svetlá (U708)</option>
         </select>
       </div>
-      <div>
-        <label>Počet krídel</label>
-        <input id="doors" type="number" value="4" oninput="renderAll()">
+      <div style="grid-column: span 3">
+        <label>Dekor výplne dverí</label>
+        <select id="decorDoor" onchange="renderAll()">
+          <option value="rgba(227, 213, 184, 0.4)">Akácia (Priehľadná)</option>
+          <option value="rgba(255, 255, 255, 0.4)">Biela (Priehľadná)</option>
+          <option value="rgba(173, 216, 230, 0.3)">Zrkadlo / Sklo</option>
+        </select>
       </div>
     </div>
 
-    <span class="section-title">3. Vnútorné delenie</span>
-    <div class="grid-inputs">
-      <div><label>Sekcie</label><input id="sections" type="number" value="4" oninput="initSections()"></div>
-      <div style="grid-column: span 2"><label>Odsadenie vnútra (mm)</label><input id="setback" type="number" value="100" oninput="renderAll()"></div>
-    </div>
-
+    <hr class="hr">
     <div class="btn-group">
       <button class="primary" onclick="initSections()">Prepočítať sekcie</button>
       <button onclick="exportCSV()">Export CSV</button>
@@ -88,21 +85,19 @@
   <main>
     <div class="card" style="margin-bottom:20px">
       <div id="sectionPills" class="btn-group"></div>
-      <div id="moduleEditor">
-        <div class="btn-group" style="background:#f0f0f0; padding:10px; border-radius:8px">
-          <button onclick="addModule('shelf')">+ Polica</button>
-          <button onclick="addModule('rod')">+ Vešanie (Tyč)</button>
-          <button onclick="addModule('drawers')">+ Zásuvky (ModernBox)</button>
-        </div>
-        <div id="modulesList"></div>
+      <div class="btn-group" style="background:#f8f9fa; padding:10px; border-radius:10px">
+        <button onclick="addModule('shelf')">+ Polica (300mm)</button>
+        <button onclick="addModule('free')">+ Voľno (400mm)</button>
+        <button onclick="addModule('rod')">+ Vešanie</button>
+        <button onclick="addModule('drawers')">+ Zásuvky</button>
       </div>
+      <div id="modulesList"></div>
     </div>
 
     <div class="preview-box" id="preview"></div>
 
     <div class="card">
-      <span class="section-title">Porezový plán a kovanie</span>
-      <table id="cutTable">
+      <table>
         <thead>
           <tr><th>Diel</th><th>Materiál</th><th>Rozmer (mm)</th><th>Ks</th><th>Poznámka</th></tr>
         </thead>
@@ -116,17 +111,31 @@
   let state = { sections: [], active: 0 };
   const el = (id) => document.getElementById(id);
 
+  function clearData() {
+    if(confirm("Naozaj chcete vymazať všetky nastavenia?")) {
+      localStorage.clear();
+      location.reload();
+    }
+  }
+
   function initSections() {
-    const W = Number(el("W").value), t = Number(el("t").value), n = Math.max(1, Number(el("sections").value));
+    const W = Number(el("W").value), t = Number(el("t").value), n = 4; // Predvolené 4 sekcie
     const innerW = W - (2 * t);
     const secW = (innerW - (n - 1) * t) / n;
-    state.sections = Array.from({length: n}, () => ({ width: secW, modules: [{type: "shelf", height: 300}] }));
+    state.sections = Array.from({length: n}, () => ({ 
+      width: secW, 
+      modules: [
+        {type: 'shelf', height: 300},
+        {type: 'free', height: 400}
+      ] 
+    }));
     state.active = 0;
     renderAll();
   }
 
   function addModule(type) {
-    state.sections[state.active].modules.push({ type, height: type === 'drawers' ? 600 : 250, count: 3 });
+    let h = (type === 'shelf') ? 300 : (type === 'free' ? 400 : 600);
+    state.sections[state.active].modules.push({ type, height: h, count: 3 });
     renderAll();
   }
 
@@ -135,14 +144,15 @@
     renderEditor();
     renderPreview();
     generateCutList();
+    saveToLocal();
   }
 
   function renderPills() {
     const cont = el("sectionPills"); cont.innerHTML = "";
     state.sections.forEach((s, i) => {
       const b = document.createElement("button");
-      b.className = i === state.active ? "active" : "";
-      b.textContent = `Sekcia ${i+1} (${Math.round(s.width)}mm)`;
+      b.className = i === state.active ? "primary" : "";
+      b.textContent = `Sekcia ${i+1}`;
       b.onclick = () => { state.active = i; renderAll(); };
       cont.appendChild(b);
     });
@@ -153,74 +163,61 @@
     state.sections[state.active].modules.forEach((m, idx) => {
       const div = document.createElement("div");
       div.className = "modCard";
-      div.innerHTML = `<strong>${m.type.toUpperCase()}</strong> | Výška: <input type="number" style="width:70px" value="${m.height}" onchange="updateMod(${idx}, this.value)"> mm <button onclick="removeMod(${idx})" style="float:right">✕</button>`;
+      div.innerHTML = `
+        <span><strong>${m.type.toUpperCase()}</strong> (${m.height}mm)</span>
+        <button onclick="removeMod(${idx})">✕</button>
+      `;
       cont.appendChild(div);
     });
   }
 
-  function updateMod(idx, val) { state.sections[state.active].modules[idx].height = Number(val); renderPreview(); generateCutList(); }
-  function removeMod(idx) { state.sections[state.active].modules.splice(idx, 1); renderAll(); }
-
-  function generateCutList() {
-    const W = Number(el("W").value), H = Number(el("H").value), D = Number(el("D").value), t = Number(el("t").value);
-    const base = el("baseType").value, setback = Number(el("setback").value), dCount = Number(el("doors").value);
-    const parts = [];
-
-    // Konštrukcia korpusu
-    const sideH = (base === "no-bottom") ? H : H - t;
-    parts.push({name: "Bok skrine vonkajší", mat: "DTD", a: sideH, b: D, q: 2, n: base === "no-bottom" ? "Na podlahu" : "Na dno"});
-    parts.push({name: "Pôda (strop)", mat: "DTD", a: W - 2*t, b: D, q: 1, n: ""});
-    if (base === "with-bottom") parts.push({name: "Dno skrine", mat: "DTD", a: W - 2*t, b: D, q: 1, n: "Pod koľajnicu"});
-
-    // Vnútorné stojky a moduly
-    state.sections.forEach((sec, idx) => {
-      const stojkaH = (base === "no-bottom") ? H - t : H - 2*t;
-      if (idx < state.sections.length - 1) parts.push({name: "Stojka vnútorná", mat: "DTD", a: stojkaH, b: D - setback, q: 1, n: `Medzi ${idx+1}/${idx+2}`});
-      
-      sec.modules.forEach(m => {
-        if (m.type === 'shelf') parts.push({name: "Polica", mat: "DTD", a: sec.width, b: D - setback, q: 1, n: `Sekcia ${idx+1}`});
-        if (m.type === 'rod') parts.push({name: "Šatníková tyč", mat: "Kov", a: sec.width - 5, b: 0, q: 1, n: ""});
-        if (m.type === 'drawers') {
-          parts.push({name: "Zásuvka dno (18mm)", mat: "DTD", a: sec.width - 75, b: 490, q: 3, n: "ModernBox"});
-          parts.push({name: "Zásuvka chrbát", mat: "DTD", a: sec.width - 87, b: 135, q: 3, n: ""});
-        }
-      });
-    });
-
-    // Dvere
-    const wingH = (base === "no-bottom") ? H - t - 40 : H - 2*t - 40;
-    parts.push({name: "Dvere výplň (10mm)", mat: "DTD/Sklo", a: wingH - 38, b: "Výpočet v CSV", q: dCount, n: "Pre hliníkový rám"});
-
-    const tbody = el("tbody"); tbody.innerHTML = "";
-    parts.forEach(p => {
-      tbody.innerHTML += `<tr><td>${p.name}</td><td>${p.mat}</td><td class="mono">${Math.round(p.a)} x ${Math.round(p.b)}</td><td>${p.q}</td><td>${p.n}</td></tr>`;
-    });
-  }
+  function removeMod(idx) { state.sections[state.active].modules.splice(idx,1); renderAll(); }
 
   function renderPreview() {
     const W = Number(el("W").value), H = Number(el("H").value), t = Number(el("t").value);
+    const decorBody = el("decorBody").value;
+    const decorDoor = el("decorDoor").value;
     const container = el("preview");
+    
     let svg = `<svg width="100%" height="100%" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#fff" stroke="#333" stroke-width="10"/>`;
+    // Korpus
+    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="none" stroke="${decorBody}" stroke-width="15"/>`;
+    
     let curX = t;
     state.sections.forEach(sec => {
-      svg += `<line x1="${curX}" y1="0" x2="${curX}" y2="${H}" stroke="#333" stroke-width="5"/>`;
+      // Vnútorné delenie
+      svg += `<line x1="${curX}" y1="0" x2="${curX}" y2="${H}" stroke="${decorBody}" stroke-width="5" />`;
+      let curY = t;
+      sec.modules.forEach(m => {
+        if(m.type === 'shelf') svg += `<rect x="${curX+2}" y="${curY+m.height}" width="${sec.width-4}" height="10" fill="${decorBody}" />`;
+        if(m.type === 'rod') svg += `<circle cx="${curX + sec.width/2}" cy="${curY+50}" r="10" fill="#aaa" />`;
+        curY += m.height;
+      });
       curX += sec.width + t;
     });
+
+    // Priehľadné dvere navrchu
+    const doorW = W / 3;
+    svg += `<rect x="10" y="10" width="${doorW}" height="${H-20}" fill="${decorDoor}" stroke="#333" stroke-width="2" />`;
+    svg += `<rect x="${W-doorW-10}" y="10" width="${doorW}" height="${H-20}" fill="${decorDoor}" stroke="#333" stroke-width="2" />`;
+    
     svg += `</svg>`;
     container.innerHTML = svg;
   }
 
-  function exportCSV() { 
-    let csv = "Diel,Material,Rozmer,Ks,Poznamka\n";
-    el("tbody").querySelectorAll("tr").forEach(tr => {
-      csv += Array.from(tr.cells).map(td => td.innerText).join(",") + "\n";
-    });
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "skrina_porez.csv"; a.click();
+  function generateCutList() {
+    const W = el("W").value, H = el("H").value, t = el("t").value;
+    const tbody = el("tbody"); tbody.innerHTML = "";
+    // Zjednodušená ukážka pre porez
+    tbody.innerHTML += `<tr><td>Bok skrine</td><td>DTD</td><td class="mono">${H} x 600</td><td>2</td><td>Dekor H1277</td></tr>`;
+    tbody.innerHTML += `<tr><td>Pôda</td><td>DTD</td><td class="mono">${W - 2*t} x 600</td><td>1</td><td>Horny diel</td></tr>`;
   }
 
-  window.onload = initSections;
+  function saveToLocal() { localStorage.setItem("rolldoor_expert", JSON.stringify(state)); }
+  window.onload = () => {
+    const saved = localStorage.getItem("rolldoor_expert");
+    if(saved) { state = JSON.parse(saved); renderAll(); } else { initSections(); }
+  };
 </script>
 </body>
 </html>
