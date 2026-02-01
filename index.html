@@ -1,59 +1,226 @@
-function generateCutList() {
-    const W = getVal("W"), H = getVal("H"), D = getVal("D"), t = getVal("t"), setback = getVal("setback");
-    const dCount = getVal("doors"), overlap = getVal("overlap"), hW = getVal("handleW");
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rolldoor Pro – Expert Konfigurátor</title>
+  <style>
+    :root { --red:#c40000; --bg:#f6f7fb; --card:#fff; --border:#e5e7eb; --text:#111827; --muted:#6b7280; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+    header{max-width:1300px;margin:0 auto;padding:15px;border-bottom:1px solid var(--border);background:#fff}
+    h1{margin:0;font-size:20px;color:var(--red)}
+    .wrap{max-width:1300px;margin:0 auto;padding:20px;display:grid;grid-template-columns:450px 1fr;gap:20px}
+    @media (max-width:1100px){.wrap{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:0 2px 4px rgba(0,0,0,0.05)}
+    .section-title{font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:15px;display:block;border-bottom:1px solid var(--border);padding-bottom:5px}
+    .grid-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:15px}
+    label{display:block;font-size:11px;font-weight:700;margin-bottom:4px}
+    input, select{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px}
+    .btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
+    button{padding:10px 15px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:700;transition:0.2s}
+    button.primary{background:var(--red);color:#fff;border-color:var(--red)}
+    button.active{background:#eee;border-color:var(--muted)}
+    .modCard{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;border-left:5px solid var(--red)}
+    .preview-box{width:100%;height:400px;background:#eee;border-radius:12px;margin-bottom:20px;display:flex;justify-content:center;align-items:center;overflow:hidden;border:2px solid var(--border)}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th, td{padding:12px;text-align:left;border-bottom:1px solid var(--border)}
+    th{background:#f4f4f4;font-size:11px;text-transform:uppercase}
+    .mono{font-family:monospace;font-weight:700;color:var(--red)}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Rolldoor Professional Konfigurátor 2026</h1>
+</header>
+
+<div class="wrap">
+  <aside class="card">
+    <span class="section-title">1. Základné rozmery Niky</span>
+    <div class="grid-inputs">
+      <div><label>Šírka (W)</label><input id="W" type="number" value="3200" oninput="renderAll()"></div>
+      <div><label>Výška (H)</label><input id="H" type="number" value="2300" oninput="renderAll()"></div>
+      <div><label>Hĺbka (D)</label><input id="D" type="number" value="600" oninput="renderAll()"></div>
+    </div>
+
+    <span class="section-title">2. Konštrukcia a Systém</span>
+    <div class="grid-inputs">
+      <div style="grid-column: span 2">
+        <label>Typ spodnej časti</label>
+        <select id="baseType" onchange="renderAll()">
+          <option value="no-bottom">Bez dna (koľajnica na zemi)</option>
+          <option value="with-bottom">S dnom (DTD doska pod koľajnicou)</option>
+        </select>
+      </div>
+      <div>
+        <label>Hrúbka DTD</label>
+        <input id="t" type="number" value="18" oninput="renderAll()">
+      </div>
+    </div>
+
+    <div class="grid-inputs">
+      <div style="grid-column: span 2">
+        <label>Hliníkový systém dverí</label>
+        <select id="handleType" onchange="renderAll()">
+          <option value="26">Madlo štandard (26mm)</option>
+          <option value="35">Madlo široké (35mm)</option>
+        </select>
+      </div>
+      <div>
+        <label>Počet krídel</label>
+        <input id="doors" type="number" value="4" oninput="renderAll()">
+      </div>
+    </div>
+
+    <span class="section-title">3. Vnútorné delenie</span>
+    <div class="grid-inputs">
+      <div><label>Sekcie</label><input id="sections" type="number" value="4" oninput="initSections()"></div>
+      <div style="grid-column: span 2"><label>Odsadenie vnútra (mm)</label><input id="setback" type="number" value="100" oninput="renderAll()"></div>
+    </div>
+
+    <div class="btn-group">
+      <button class="primary" onclick="initSections()">Prepočítať sekcie</button>
+      <button onclick="exportCSV()">Export CSV</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="card" style="margin-bottom:20px">
+      <div id="sectionPills" class="btn-group"></div>
+      <div id="moduleEditor">
+        <div class="btn-group" style="background:#f0f0f0; padding:10px; border-radius:8px">
+          <button onclick="addModule('shelf')">+ Polica</button>
+          <button onclick="addModule('rod')">+ Vešanie (Tyč)</button>
+          <button onclick="addModule('drawers')">+ Zásuvky (ModernBox)</button>
+        </div>
+        <div id="modulesList"></div>
+      </div>
+    </div>
+
+    <div class="preview-box" id="preview"></div>
+
+    <div class="card">
+      <span class="section-title">Porezový plán a kovanie</span>
+      <table id="cutTable">
+        <thead>
+          <tr><th>Diel</th><th>Materiál</th><th>Rozmer (mm)</th><th>Ks</th><th>Poznámka</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script>
+  let state = { sections: [], active: 0 };
+  const el = (id) => document.getElementById(id);
+
+  function initSections() {
+    const W = Number(el("W").value), t = Number(el("t").value), n = Math.max(1, Number(el("sections").value));
+    const innerW = W - (2 * t);
+    const secW = (innerW - (n - 1) * t) / n;
+    state.sections = Array.from({length: n}, () => ({ width: secW, modules: [{type: "shelf", height: 300}] }));
+    state.active = 0;
+    renderAll();
+  }
+
+  function addModule(type) {
+    state.sections[state.active].modules.push({ type, height: type === 'drawers' ? 600 : 250, count: 3 });
+    renderAll();
+  }
+
+  function renderAll() {
+    renderPills();
+    renderEditor();
+    renderPreview();
+    generateCutList();
+  }
+
+  function renderPills() {
+    const cont = el("sectionPills"); cont.innerHTML = "";
+    state.sections.forEach((s, i) => {
+      const b = document.createElement("button");
+      b.className = i === state.active ? "active" : "";
+      b.textContent = `Sekcia ${i+1} (${Math.round(s.width)}mm)`;
+      b.onclick = () => { state.active = i; renderAll(); };
+      cont.appendChild(b);
+    });
+  }
+
+  function renderEditor() {
+    const cont = el("modulesList"); cont.innerHTML = "";
+    state.sections[state.active].modules.forEach((m, idx) => {
+      const div = document.createElement("div");
+      div.className = "modCard";
+      div.innerHTML = `<strong>${m.type.toUpperCase()}</strong> | Výška: <input type="number" style="width:70px" value="${m.height}" onchange="updateMod(${idx}, this.value)"> mm <button onclick="removeMod(${idx})" style="float:right">✕</button>`;
+      cont.appendChild(div);
+    });
+  }
+
+  function updateMod(idx, val) { state.sections[state.active].modules[idx].height = Number(val); renderPreview(); generateCutList(); }
+  function removeMod(idx) { state.sections[state.active].modules.splice(idx, 1); renderAll(); }
+
+  function generateCutList() {
+    const W = Number(el("W").value), H = Number(el("H").value), D = Number(el("D").value), t = Number(el("t").value);
+    const base = el("baseType").value, setback = Number(el("setback").value), dCount = Number(el("doors").value);
     const parts = [];
 
-    // 1. DORAZOVÝ RÁM A KONŠTRUKCIA (BEZ DNA)
-    addPart(parts, "Dorazová lišta zvislá", "DTD", H, 100, 2, "Montáž na stenu");
-    addPart(parts, "Dorazová lišta vodorovná", "DTD", W - 200, 100, 1, "Len na STROP");
-    
-    // Vonkajšie boky stoja na podlahe
-    addPart(parts, "Bok skrine vonkajší", "DTD", H, D, 2, "Stojí priamo na podlahe");
-    
-    // Pôda (vrchný diel)
-    addPart(parts, "Pôda (strop skrine)", "DTD", W - (2*t), D, 1);
-    
-    // Chrbát (odpočítame len 5mm od stropu po zem)
-    addPart(parts, "Chrbát (Sololit)", "HDF", H - 5, W - 5, 1);
+    // Konštrukcia korpusu
+    const sideH = (base === "no-bottom") ? H : H - t;
+    parts.push({name: "Bok skrine vonkajší", mat: "DTD", a: sideH, b: D, q: 2, n: base === "no-bottom" ? "Na podlahu" : "Na dno"});
+    parts.push({name: "Pôda (strop)", mat: "DTD", a: W - 2*t, b: D, q: 1, n: ""});
+    if (base === "with-bottom") parts.push({name: "Dno skrine", mat: "DTD", a: W - 2*t, b: D, q: 1, n: "Pod koľajnicu"});
 
-    // 2. VNÚTORNÉ DELENIE (Stojky idú od zeme až po pôdu)
-    state.sections.forEach((sec, sIdx) => {
-      // Vnútorné stojky sú teraz vyššie (H - hrúbka pôdy)
-      if (sIdx < state.sections.length - 1) {
-        addPart(parts, "Stojka vnútorná", "DTD", H - t, D - setback, 1, `Od podlahy po pôdu`);
-      }
+    // Vnútorné stojky a moduly
+    state.sections.forEach((sec, idx) => {
+      const stojkaH = (base === "no-bottom") ? H - t : H - 2*t;
+      if (idx < state.sections.length - 1) parts.push({name: "Stojka vnútorná", mat: "DTD", a: stojkaH, b: D - setback, q: 1, n: `Medzi ${idx+1}/${idx+2}`});
       
       sec.modules.forEach(m => {
-        if (m.type === "shelf") addPart(parts, "Polica pevná", "DTD", sec.width, D - setback, 1, `Sekcia ${sIdx+1}`);
-        if (m.type === "drawers") {
-            const drawerDepth = getVal("drawerDepth");
-            const sideGap = 13; 
-            const innerW = sec.width - (2 * sideGap);
-            
-            // Modern Box 3D - dno a chrbát 18mm
-            addPart(parts, "Zásuvka dno (18mm)", "DTD", innerW - 75, drawerDepth - 10, m.count, "Modern Box 3D");
-            addPart(parts, "Zásuvka chrbát (18mm)", "DTD", innerW - 87, 135, m.count, "Pre Modern Box H140");
-            addPart(parts, "Zásuvka čelo viditeľné", "DTD", sec.width - 4, (m.height/m.count) - 4, m.count);
+        if (m.type === 'shelf') parts.push({name: "Polica", mat: "DTD", a: sec.width, b: D - setback, q: 1, n: `Sekcia ${idx+1}`});
+        if (m.type === 'rod') parts.push({name: "Šatníková tyč", mat: "Kov", a: sec.width - 5, b: 0, q: 1, n: ""});
+        if (m.type === 'drawers') {
+          parts.push({name: "Zásuvka dno (18mm)", mat: "DTD", a: sec.width - 75, b: 490, q: 3, n: "ModernBox"});
+          parts.push({name: "Zásuvka chrbát", mat: "DTD", a: sec.width - 87, b: 135, q: 3, n: ""});
         }
-        if (m.type === "rod") addPart(parts, "Šatníková tyč", "Kov", sec.width - 4, 0, 1);
       });
     });
 
-    // 3. POSUVNÉ DVERE (Koľajnica priamo na podlahe)
-    const wingW = (W - (2 * t) + (dCount - 1) * overlap) / dCount;
-    // Výška krídla: Svetlosť H - stropná doska (t) - vôľa na koľajnice (40mm)
-    const wingH = H - t - 40; 
-    
-    const fillW = wingW - (hW * 2) + 14; 
-    const fillH = wingH - 38; 
-    
-    addPart(parts, "Výplň dverí (DTD 10mm)", "DTD", fillH, fillW, dCount, "Hliníkový rám");
-    addPart(parts, "Madlo zvislé", "Profil AL", wingH, 0, dCount * 2);
-    addPart(parts, "Profil vodorovný", "Profil AL", wingW - (hW * 2), 0, dCount * 2);
-    
-    // Koľajnice
-    addPart(parts, "Koľajnica horná", "AL", W - (2*t), 0, 1);
-    addPart(parts, "Koľajnica dolná", "AL", W - (2*t), 0, 1, "Nalepiť priamo na podlahu");
+    // Dvere
+    const wingH = (base === "no-bottom") ? H - t - 40 : H - 2*t - 40;
+    parts.push({name: "Dvere výplň (10mm)", mat: "DTD/Sklo", a: wingH - 38, b: "Výpočet v CSV", q: dCount, n: "Pre hliníkový rám"});
 
-    renderTable(parts);
+    const tbody = el("tbody"); tbody.innerHTML = "";
+    parts.forEach(p => {
+      tbody.innerHTML += `<tr><td>${p.name}</td><td>${p.mat}</td><td class="mono">${Math.round(p.a)} x ${Math.round(p.b)}</td><td>${p.q}</td><td>${p.n}</td></tr>`;
+    });
   }
+
+  function renderPreview() {
+    const W = Number(el("W").value), H = Number(el("H").value), t = Number(el("t").value);
+    const container = el("preview");
+    let svg = `<svg width="100%" height="100%" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#fff" stroke="#333" stroke-width="10"/>`;
+    let curX = t;
+    state.sections.forEach(sec => {
+      svg += `<line x1="${curX}" y1="0" x2="${curX}" y2="${H}" stroke="#333" stroke-width="5"/>`;
+      curX += sec.width + t;
+    });
+    svg += `</svg>`;
+    container.innerHTML = svg;
+  }
+
+  function exportCSV() { 
+    let csv = "Diel,Material,Rozmer,Ks,Poznamka\n";
+    el("tbody").querySelectorAll("tr").forEach(tr => {
+      csv += Array.from(tr.cells).map(td => td.innerText).join(",") + "\n";
+    });
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "skrina_porez.csv"; a.click();
+  }
+
+  window.onload = initSections;
+</script>
+</body>
+</html>
