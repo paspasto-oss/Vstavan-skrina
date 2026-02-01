@@ -1,115 +1,146 @@
 <!doctype html>
 <html lang="sk">
 <head>
-  <meta charset="utf-8" />
-  <title>Rolldoor Pro 2026 - Oprava Náhľadu</title>
-  <style>
-    :root { --red:#c40000; --bg:#f7fafc; --border:#e2e8f0; }
-    body { font-family: sans-serif; background: var(--bg); margin: 20px; }
-    .container { display: grid; grid-template-columns: 350px 1fr; gap: 20px; max-width: 1400px; margin: auto; }
-    .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .preview-box { 
-      background: #fff; 
-      min-height: 500px; 
-      border: 2px solid #cbd5e0; 
-      border-radius: 8px; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      padding: 20px;
-    }
-    input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 6px; }
-    button { width: 100%; padding: 10px; background: var(--red); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-    th, td { border: 1px solid var(--border); padding: 8px; text-align: left; }
-    th { background: #f8fafb; }
-  </style>
+    <meta charset="utf-8" />
+    <title>Rolldoor Pro 2026 - Oprava Vercel</title>
+    <style>
+        :root { --red:#c40000; --bg:#f7fafc; --border:#e2e8f0; --dark: #2d3748; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { display: grid; grid-template-columns: 350px 1fr; gap: 20px; max-width: 1400px; margin: auto; }
+        .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h3 { margin-top: 0; color: var(--dark); border-bottom: 2px solid var(--red); padding-bottom: 5px; }
+        
+        .preview-box { 
+            background: #fff; 
+            min-height: 550px; 
+            border: 2px solid #cbd5e0; 
+            border-radius: 8px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; font-weight: bold; color: #718096; text-transform: uppercase; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        
+        button { 
+            width: 100%; padding: 12px; background: var(--red); color: #fff; border: none; 
+            border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+        th, td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+        th { background: #f8fafb; color: #4a5568; }
+        tr:nth-child(even) { background: #fdfdfd; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <aside class="card">
-    <h3>Nastavenia</h3>
-    <label>Šírka (W)</label> <input type="number" id="W" value="3200" oninput="updateAll()">
-    <label>Výška (H)</label> <input type="number" id="H" value="2300" oninput="updateAll()">
-    <label>Počet sekcií</label> <input type="number" id="sections" value="4" oninput="updateAll()">
-    <label>Počet dverí</label> <input type="number" id="doors" value="3" oninput="updateAll()">
-    <button onclick="updateAll()">Aktualizovať náhľad</button>
-  </aside>
-
-  <main>
-    <div class="card">
-      <h3>Vizuálny náhľad skrine</h3>
-      <div class="preview-box" id="svgContainer">
+    <aside class="card">
+        <h3>Nastavenia</h3>
+        <div class="input-group">
+            <label>Šírka otvoru (W mm)</label>
+            <input type="number" id="W" value="3200" oninput="updateAll()">
         </div>
-    </div>
-    
-    <div class="card">
-      <h3>Porezový plán</h3>
-      <table id="cutTable">
-        <thead><tr><th>Diel</th><th>Rozmer (mm)</th><th>Ks</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </main>
+        <div class="input-group">
+            <label>Výška otvoru (H mm)</label>
+            <input type="number" id="H" value="2300" oninput="updateAll()">
+        </div>
+        <div class="input-group">
+            <label>Počet sekcií</label>
+            <input type="number" id="sections" value="4" oninput="updateAll()">
+        </div>
+        <div class="input-group">
+            <label>Počet dverí</label>
+            <input type="number" id="doors" value="3" oninput="updateAll()">
+        </div>
+        <button onclick="updateAll()">Aktualizovať nákres</button>
+        <p style="font-size: 11px; color: #a0aec0; margin-top: 15px;">
+            * Automatický výpočet pre Modern 3D zásuvky a hliníkový rámový systém.
+        </p>
+    </aside>
+
+    <main>
+        <div class="card">
+            <h3>Vizuálny náhľad (Priehľadné dvere)</h3>
+            <div class="preview-box" id="svgContainer">
+                </div>
+        </div>
+        
+        <div class="card">
+            <h3>Porezový plán (Cut List)</h3>
+            <table id="cutTable">
+                <thead>
+                    <tr>
+                        <th>Diel</th>
+                        <th>Rozmer (mm)</th>
+                        <th>Ks</th>
+                        <th>Materiál</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </main>
 </div>
 
 <script>
 function updateAll() {
-    const W = Number(document.getElementById('W').value);
-    const H = Number(document.getElementById('H').value);
-    const n = Number(document.getElementById('sections').value);
-    const d = Number(document.getElementById('doors').value);
-    const t = 18; // hrúbka dosky
+    const W = Number(document.getElementById('W').value) || 0;
+    const H = Number(document.getElementById('H').value) || 0;
+    const n = Number(document.getElementById('sections').value) || 1;
+    const d = Number(document.getElementById('doors').value) || 2;
+    const t = 18; // Hrúbka DTD
+    const setback = 100; // Odsadenie vnútra pre koľajnice
 
-    // 1. VÝPOČET DIELOV DO TABUĽKY
-    const tbody = document.querySelector("#cutTable tbody");
-    const secW = (W - (2 * t) - ((n - 1) * t)) / n;
+    if (W <= 0 || H <= 0) return;
+
+    // 1. VÝPOČET DIELOV
+    const tbody = document.getElementById("tbody");
+    const innerW = W - (2 * t);
+    const secW = (innerW - ((n - 1) * t)) / n;
     
     tbody.innerHTML = `
-        <tr><td>Bok skrine</td><td>${H} x 600</td><td>2</td></tr>
-        <tr><td>Pôda (strop)</td><td>${Math.round(W - 2*t)} x 600</td><td>1</td></tr>
-        <tr><td>Vnútorná stojka</td><td>${H - t} x 500</td><td>${n - 1}</td></tr>
-        <tr><td>Polica</td><td>${Math.round(secW)} x 500</td><td>${n * 4}</td></tr>
+        <tr><td><b>Bok vonkajší</b></td><td>${H} x 600</td><td>2</td><td>DTD 18mm</td></tr>
+        <tr><td><b>Pôda (strop)</b></td><td>${Math.round(W - 2*t)} x 600</td><td>1</td><td>DTD 18mm</td></tr>
+        <tr><td><b>Vnútorná stojka</b></td><td>${H - t} x ${600 - setback}</td><td>${n - 1}</td><td>DTD 18mm</td></tr>
+        <tr><td><b>Polica</b></td><td>${Math.round(secW)} x ${600 - setback}</td><td>${n * 4}</td><td>DTD 18mm</td></tr>
+        <tr><td><b>Výplň dverí</b></td><td>${H - t - 40} x ${Math.round((innerW + (d-1)*30)/d - 50)}</td><td>${d}</td><td>DTD 10mm / Sklo</td></tr>
     `;
 
-    // 2. VYKRESLENIE SVG (NÁHĽAD)
+    // 2. SVG RENDERING
     const container = document.getElementById('svgContainer');
-    const scale = Math.min(800 / W, 450 / H); // mierka pre zobrazenie
+    const containerWidth = container.clientWidth - 40;
+    const containerHeight = 500;
+    
+    const scale = Math.min(containerWidth / W, containerHeight / H);
     const svgW = W * scale;
     const svgH = H * scale;
 
-    let svg = `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #eee">`;
+    let svg = `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
     
-    // Vonkajší korpus
-    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#fdfdfd" stroke="#333" stroke-width="20"/>`;
-    
-    // Vnútorné delenie (Sekcie)
+    // Pozadie
+    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#f8fafb" />`;
+
+    // VNÚTRO (Stojky a police)
     let curX = t;
     for (let i = 0; i < n; i++) {
-        // Police v sekcii
+        // Police
         for (let j = 1; j < 5; j++) {
-            svg += `<line x1="${curX}" y1="${(H/5)*j}" x2="${curX + secW}" y2="${(H/5)*j}" stroke="#cbd5e0" stroke-width="10"/>`;
+            svg += `<rect x="${curX}" y="${(H/5)*j}" width="${secW}" height="10" fill="#cbd5e0" />`;
         }
         curX += secW;
         if (i < n - 1) {
-            svg += `<line x1="${curX + t/2}" y1="${t}" x2="${curX + t/2}" y2="${H}" stroke="#4a5568" stroke-width="15"/>`;
+            // Stojka
+            svg += `<rect x="${curX}" y="${t}" width="${t}" height="${H-t}" fill="#4a5568" />`;
             curX += t;
         }
     }
 
-    // Priehľadné dvere (modrá vrstva)
-    const wingW = (W / d) + 30;
-    for (let k = 0; k < d; k++) {
-        svg += `<rect x="${(W/d)*k}" y="0" width="${wingW}" height="${H}" fill="rgba(66,153,225,0.2)" stroke="#2b6cb0" stroke-width="2"/>`;
-    }
-
-    svg += `</svg>`;
-    container.innerHTML = svg;
-}
-
-// Spustiť pri načítaní
-window.onload = updateAll;
-</script>
-</body>
-</html>
+    // RÁM (Boky a Vrch)
+    svg += `<rect x="0" y="0" width="${t}"
