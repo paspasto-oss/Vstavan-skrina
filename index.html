@@ -1,79 +1,115 @@
-// --- VÝROBNÉ VZORCE A LOGIKA VÝPOČTU ---
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <title>Rolldoor Pro 2026 - Oprava Náhľadu</title>
+  <style>
+    :root { --red:#c40000; --bg:#f7fafc; --border:#e2e8f0; }
+    body { font-family: sans-serif; background: var(--bg); margin: 20px; }
+    .container { display: grid; grid-template-columns: 350px 1fr; gap: 20px; max-width: 1400px; margin: auto; }
+    .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .preview-box { 
+      background: #fff; 
+      min-height: 500px; 
+      border: 2px solid #cbd5e0; 
+      border-radius: 8px; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 20px;
+    }
+    input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 6px; }
+    button { width: 100%; padding: 10px; background: var(--red); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+    th, td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+    th { background: #f8fafb; }
+  </style>
+</head>
+<body>
 
-function calculateAutomatedParts() {
-    const W = parseFloat(document.getElementById('W').value); // Celková šírka otvoru
-    const H = parseFloat(document.getElementById('H').value); // Celková výška otvoru
-    const D = parseFloat(document.getElementById('D').value); // Celková hĺbka skrine
-    const t = 18; // Štandardná hrúbka DTD (mm)
-    const setback = 100; // Odsadenie vnútra pre koľajnice dverí
-    const doorCount = parseInt(document.getElementById('doorCount').value);
-    const overlap = 30; // Prekrytie dverí (mm)
+<div class="container">
+  <aside class="card">
+    <h3>Nastavenia</h3>
+    <label>Šírka (W)</label> <input type="number" id="W" value="3200" oninput="updateAll()">
+    <label>Výška (H)</label> <input type="number" id="H" value="2300" oninput="updateAll()">
+    <label>Počet sekcií</label> <input type="number" id="sections" value="4" oninput="updateAll()">
+    <label>Počet dverí</label> <input type="number" id="doors" value="3" oninput="updateAll()">
+    <button onclick="updateAll()">Aktualizovať náhľad</button>
+  </aside>
 
-    const parts = [];
-
-    // 1. KORPUS (Variant bez dna - koľajnica na podlahe)
-    // Boky skrine (stoja na zemi, siahajú po vrch)
-    addPart(parts, "Bok skrine vonkajší", H, D, 2, "DTD 18mm");
+  <main>
+    <div class="card">
+      <h3>Vizuálny náhľad skrine</h3>
+      <div class="preview-box" id="svgContainer">
+        </div>
+    </div>
     
-    // Pôda (horný strop - vkladaný medzi boky)
-    const pdaW = W - (2 * t);
-    addPart(parts, "Pôda (strop korpusu)", pdaW, D, 1, "DTD 18mm");
+    <div class="card">
+      <h3>Porezový plán</h3>
+      <table id="cutTable">
+        <thead><tr><th>Diel</th><th>Rozmer (mm)</th><th>Ks</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+</div>
 
-    // Vnútorné stojky (idú od zeme po pôdu)
-    const stojkaH = H - t;
-    const stojkaD = D - setback;
-    const pocetStojok = sections.length - 1;
-    if (pocetStojok > 0) {
-        addPart(parts, "Stojka vnútorná", stojkaH, stojkaD, pocetStojok, "DTD 18mm");
+<script>
+function updateAll() {
+    const W = Number(document.getElementById('W').value);
+    const H = Number(document.getElementById('H').value);
+    const n = Number(document.getElementById('sections').value);
+    const d = Number(document.getElementById('doors').value);
+    const t = 18; // hrúbka dosky
+
+    // 1. VÝPOČET DIELOV DO TABUĽKY
+    const tbody = document.querySelector("#cutTable tbody");
+    const secW = (W - (2 * t) - ((n - 1) * t)) / n;
+    
+    tbody.innerHTML = `
+        <tr><td>Bok skrine</td><td>${H} x 600</td><td>2</td></tr>
+        <tr><td>Pôda (strop)</td><td>${Math.round(W - 2*t)} x 600</td><td>1</td></tr>
+        <tr><td>Vnútorná stojka</td><td>${H - t} x 500</td><td>${n - 1}</td></tr>
+        <tr><td>Polica</td><td>${Math.round(secW)} x 500</td><td>${n * 4}</td></tr>
+    `;
+
+    // 2. VYKRESLENIE SVG (NÁHĽAD)
+    const container = document.getElementById('svgContainer');
+    const scale = Math.min(800 / W, 450 / H); // mierka pre zobrazenie
+    const svgW = W * scale;
+    const svgH = H * scale;
+
+    let svg = `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #eee">`;
+    
+    // Vonkajší korpus
+    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#fdfdfd" stroke="#333" stroke-width="20"/>`;
+    
+    // Vnútorné delenie (Sekcie)
+    let curX = t;
+    for (let i = 0; i < n; i++) {
+        // Police v sekcii
+        for (let j = 1; j < 5; j++) {
+            svg += `<line x1="${curX}" y1="${(H/5)*j}" x2="${curX + secW}" y2="${(H/5)*j}" stroke="#cbd5e0" stroke-width="10"/>`;
+        }
+        curX += secW;
+        if (i < n - 1) {
+            svg += `<line x1="${curX + t/2}" y1="${t}" x2="${curX + t/2}" y2="${H}" stroke="#4a5568" stroke-width="15"/>`;
+            curX += t;
+        }
     }
 
-    // 2. POLICE (Rozmer podľa šírky každej sekcie)
-    sections.forEach((secW, index) => {
-        // Polica je o 2mm užšia ako svetlosť sekcie pre ľahkú montáž
-        addPart(parts, `Polica (Sekcia ${index + 1})`, Math.round(secW - 2), stojkaD, 4, "DTD 18mm");
-    });
+    // Priehľadné dvere (modrá vrstva)
+    const wingW = (W / d) + 30;
+    for (let k = 0; k < d; k++) {
+        svg += `<rect x="${(W/d)*k}" y="0" width="${wingW}" height="${H}" fill="rgba(66,153,225,0.2)" stroke="#2b6cb0" stroke-width="2"/>`;
+    }
 
-    // 3. POSUVNÉ DVERE (Hliníkový rámový systém)
-    // Výpočet šírky krídla: (Svetlá šírka + (počet prekrytí * rozmer prekrytia)) / počet dverí
-    const vnutornaSirka = W - (2 * t);
-    const wingW = (vnutornaSirka + ((doorCount - 1) * overlap)) / doorCount;
-    
-    // Výška krídla: Celková výška - pôda(18) - vôľa pre kolajnice(40)
-    const wingH = H - t - 40;
-
-    // Výplň dverí (DTD 10mm alebo sklo)
-    // Odpočty pre hliníkové profily (univerzálne: madlo 26mm, rám 38mm)
-    const fillW = wingW - (2 * 26) + 14; // +14mm zapadnutie do madiel
-    const fillH = wingH - 38; // Odpočet pre horný/dolný profil
-
-    addPart(parts, "Dvere - výplň DTD 10mm", fillH, fillW, doorCount, "Výplň do rámu");
-    addPart(parts, "Al Madlo zvislé", wingH, 0, doorCount * 2, "Hliníkový profil");
-    addPart(parts, "Al Profil vodorovný", wingW - (2 * 26), 0, doorCount * 2, "Horný/Dolný rám");
-
-    renderTable(parts);
-    updatePrice(parts);
+    svg += `</svg>`;
+    container.innerHTML = svg;
 }
 
-function addPart(list, name, dimA, dimB, qty, mat) {
-    list.push({
-        name: name,
-        dim: `${Math.round(dimA)} x ${Math.round(dimB)}`,
-        area: (dimA * dimB * qty) / 1000000,
-        qty: qty,
-        mat: mat
-    });
-}
-
-function renderTable(parts) {
-    const tbody = document.querySelector('#partsTable tbody');
-    tbody.innerHTML = '';
-    parts.forEach(p => {
-        tbody.innerHTML += `
-            <tr>
-                <td style="padding:10px; border-bottom:1px solid #eee">${p.name}</td>
-                <td style="padding:10px; border-bottom:1px solid #eee"><strong>${p.dim}</strong></td>
-                <td style="padding:10px; border-bottom:1px solid #eee">${p.qty} ks</td>
-                <td style="padding:10px; border-bottom:1px solid #eee">${p.mat}</td>
-            </tr>`;
-    });
-}
+// Spustiť pri načítaní
+window.onload = updateAll;
+</script>
+</body>
+</html>
